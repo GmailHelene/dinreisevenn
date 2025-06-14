@@ -15,7 +15,7 @@ require('dotenv').config();
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY
 });
-app.use(cors({ origin: "https://simplifybiz.ai/dinreisevenn/index.html" }));
+app.use(cors({ origin: ["https://simplifybiz.ai", "https://simplifybiz.ai/dinreisevenn"] }));
 app.use(express.json());
 
 // Hoved-endepunkt for å generere reiseforslag
