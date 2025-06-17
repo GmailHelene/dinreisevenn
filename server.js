@@ -27,8 +27,37 @@ app.post('/api/generate-travel-suggestions', async (req, res) => {
       messages: [{ role: "user", content: prompt }],
       temperature: 0.7
     });
-    const plan = completion.choices[0].message.content;
-    res.json({ plan });
+    let content = completion.choices[0].message.content;
+
+    // Prøv å parse JSON fra responsen
+    let suggestions = null, plans = null, plan = null;
+    try {
+      // Finn første { og siste } for å rydde bort evt. tekst rundt JSON
+      const jsonStart = content.indexOf('{');
+      const jsonEnd = content.lastIndexOf('}');
+      if (jsonStart !== -1 && jsonEnd !== -1) {
+        content = content.substring(jsonStart, jsonEnd + 1);
+      }
+      const parsed = JSON.parse(content);
+
+      if (Array.isArray(parsed.plans) && Array.isArray(parsed.suggestions)) {
+        suggestions = parsed.suggestions;
+        plans = parsed.plans;
+      } else if (parsed.plan) {
+        plan = parsed.plan;
+      }
+    } catch (e) {
+      // Hvis ikke JSON, send som tekst
+      plan = content;
+    }
+
+    if (suggestions && plans) {
+      res.json({ suggestions, plans });
+    } else if (plan) {
+      res.json({ plan });
+    } else {
+      res.status(500).json({ error: "Kunne ikke tolke OpenAI-respons." });
+    }
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -48,7 +77,21 @@ app.get('/api/restaurants/:location', async (req, res) => {
 
 // Hjelpefunksjon for å konstruere en detaljert prompt basert på brukerdata
 function constructTravelPrompt(userData) {
-  return `Lag en reiseplan for ${userData.duration} dager i ${userData.location} for ${userData.groupSize} personer. Interesser: ${userData.interests.join(", ")}. Budsjett: ${userData.budget}. Aldersgruppe: ${userData.ageGroup}, Aktivitetsnivå: ${userData.activityLevel}, Transportmidler: ${userData.transport.join(", ")}.`;
+  return `Lag en reiseplan for ${userData.duration} dager i ${userData.location} for ${userData.groupSize} personer. Interesser: ${userData.interests.join(", ")}. Budsjett: ${userData.budget}. Aldersgruppe: ${Array.isArray(userData.ageGroup) ? userData.ageGroup.join(", ") : userData.ageGroup}, Aktivitetsnivå: ${userData.activityLevel}, Transportmidler: ${userData.transport.join(", ")}. 
+Svar kun med gyldig JSON på formatet: 
+{
+  "suggestions": [
+    { "title": "Kort forslag", "description": "..." }
+  ],
+  "plans": [
+    {
+      "title": "Dag 1",
+      "activities": [
+        { "time": "09:00", "activity": "Frokost", "description": "..." }
+      ]
+    }
+  ]
+}`;
 }
 
 // Anmeldelser
@@ -111,4 +154,36 @@ app.post('/api/recognize-image', upload.single('image'), async (req, res) => {
 app.use(express.static(path.join(__dirname, '../frontend')));
 app.listen(port, () => {
   console.log(`TravelAI API server running on port ${port}`);
+});
+
+// Disse endepunktene ser ut til å være nye (sammenlignet med tidligere versjon):
+app.post('/api/save-plan', (req, res) => {
+  const { userId, plan } = req.body;
+  if (userId && plan) {
+    db.addPlan(userId, plan, (err) => {
+      if (err) return res.status(500).json({ error: "DB-feil" });
+      res.json({ status: "Plan lagret" });
+    });
+  } else {
+    res.status(400).json({ error: "Mangler bruker eller plan" });
+  }
+});
+
+app.get('/api/my-plans/:userId', (req, res) => {
+  db.getPlansByUser(req.params.userId, (err, rows) => {
+    if (err) return res.status(500).json({ error: "DB-feil" });
+    const plans = rows.map(row => ({
+      ...row,
+      plan: JSON.parse(row.plan)
+    }));
+    res.json(plans);
+  });
+});
+
+app.delete('/api/plan/:planId', (req, res) => {
+  const userId = req.query.userId;
+  db.deletePlan(req.params.planId, userId, (err) => {
+    if (err) return res.status(500).json({ error: "DB-feil" });
+    res.json({ status: "Plan slettet" });
+  });
 });
