@@ -8,6 +8,14 @@ db.serialize(() => {
     review TEXT,
     date TEXT
   )`);
+  
+  // Legg til etter reviews-tabellen:
+  db.run(`CREATE TABLE IF NOT EXISTS plans (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    userId TEXT,
+    plan TEXT,
+    date TEXT
+  )`);
 });
 
 function addReview(review, cb) {
@@ -18,4 +26,20 @@ function getReviews(cb) {
   db.all("SELECT * FROM reviews ORDER BY date DESC", cb);
 }
 
-module.exports = { addReview, getReviews };
+function addPlan(userId, plan, cb) {
+  db.run("INSERT INTO plans (userId, plan, date) VALUES (?, ?, ?)", [userId, JSON.stringify(plan), new Date().toISOString()], cb);
+}
+
+function getPlans(cb) {
+  db.all("SELECT * FROM plans ORDER BY date DESC", cb);
+}
+
+function getPlansByUser(userId, cb) {
+  db.all("SELECT * FROM plans WHERE userId = ? ORDER BY date DESC", [userId], cb);
+}
+
+function deletePlan(planId, userId, cb) {
+  db.run("DELETE FROM plans WHERE id = ? AND userId = ?", [planId, userId], cb);
+}
+
+module.exports = { addReview, getReviews, addPlan, getPlansByUser, deletePlan };
