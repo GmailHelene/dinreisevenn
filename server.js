@@ -11,18 +11,76 @@ const port = process.env.PORT || 3000;
 // Miljøvariabler
 require('dotenv').config();
 
+// Sjekk kritiske miljøvariabler
+if (!process.env.OPENAI_API_KEY) {
+  console.error('⚠️  OPENAI_API_KEY mangler i miljøvariabler');
+  console.log('Tilgjengelige miljøvariabler:', Object.keys(process.env).sort());
+}
+
+console.log('🚀 Starting server...');
+console.log('📍 Environment:', process.env.NODE_ENV || 'development');
+console.log('🔧 Port:', port);
+console.log('🤖 OpenAI API Key:', process.env.OPENAI_API_KEY ? 'Found' : 'Missing');
+
 // OpenAI konfigurasjon
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY
 });
-app.use(cors({ origin: ["https://simplifybiz.ai", "https://simplifybiz.ai/dinreisevenn"] }));
+
+// CORS konfiguration - tillat både lokalt og produksjon
+const allowedOrigins = [
+  "https://simplifybiz.ai",
+  "https://simplifybiz.ai/dinreisevenn",
+  "https://dinreisevenn-production.up.railway.app",
+  "http://localhost:3000",
+  "http://localhost:8080"
+];
+
+app.use(cors({ 
+  origin: function (origin, callback) {
+    // Tillat forespørsler uten origin (f.eks. mobilapper)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true
+}));
+
 app.use(express.json());
 
 const budgetValidator = require('./middleware/budgetValidator');
 
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.json({ 
+    status: 'OK', 
+    timestamp: new Date().toISOString(),
+    version: '1.0.0',
+    environment: process.env.NODE_ENV || 'development',
+    port: port,
+    openai: process.env.OPENAI_API_KEY ? 'configured' : 'missing'
+  });
+});
+
+// Root route - serve mobile.html
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'mobile.html'));
+});
+
 // Hoved-endepunkt for å generere reiseforslag
 app.post('/api/generate-travel-suggestions', budgetValidator, async (req, res) => {
   try {
+    if (!process.env.OPENAI_API_KEY) {
+      return res.status(500).json({ 
+        error: 'OpenAI API key ikke konfigurert',
+        details: 'Kontakt administrator for å sette opp OpenAI API key'
+      });
+    }
+
     const prompt = constructTravelPrompt(req.body);
     const completion = await openai.chat.completions.create({
       model: "gpt-4o",
@@ -269,6 +327,13 @@ app.delete('/api/plan/:planId', (req, res) => {
 // Nytt endepunkt for mobilskjema - alle felt på én side
 app.post('/api/mobile-travel-form', budgetValidator, async (req, res) => {
   try {
+    if (!process.env.OPENAI_API_KEY) {
+      return res.status(500).json({ 
+        error: 'OpenAI API key ikke konfigurert',
+        details: 'Kontakt administrator for å sette opp OpenAI API key'
+      });
+    }
+
     // Valider at alle nødvendige felt er til stede
     const requiredFields = ['location', 'duration', 'groupSize', 'interests', 'budget', 'ageGroup', 'activityLevel', 'transport'];
     const missingFields = requiredFields.filter(field => !req.body[field]);
