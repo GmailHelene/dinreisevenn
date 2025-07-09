@@ -1,117 +1,143 @@
-
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Icon Generator</title>
+    <title>PWA Icon Generator</title>
     <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .icon-container { margin: 20px 0; }
         canvas { border: 1px solid #ccc; margin: 10px; }
+        button { padding: 10px 20px; margin: 10px; background: #667eea; color: white; border: none; border-radius: 5px; cursor: pointer; }
     </style>
 </head>
 <body>
-    <h1>PWA Icon Generator</h1>
-    <p>Right-click on each canvas and save as PNG with the specified name:</p>
+    <h1>PWA Icon Generator for Din Reisevenn</h1>
+    <p>Click "Generate All Icons" to create PNG icons for the PWA:</p>
     
+    <button onclick="generateAllIcons()">Generate All Icons</button>
+    <button onclick="downloadAllIcons()">Download All Icons as ZIP</button>
     
-        <div>
-            <h3>icon-16x16.png</h3>
-            <canvas id="canvas16" width="16" height="16"></canvas>
-        </div>
-    
-        <div>
-            <h3>icon-32x32.png</h3>
-            <canvas id="canvas32" width="32" height="32"></canvas>
-        </div>
-    
-        <div>
-            <h3>icon-72x72.png</h3>
-            <canvas id="canvas72" width="72" height="72"></canvas>
-        </div>
-    
-        <div>
-            <h3>icon-96x96.png</h3>
-            <canvas id="canvas96" width="96" height="96"></canvas>
-        </div>
-    
-        <div>
-            <h3>icon-128x128.png</h3>
-            <canvas id="canvas128" width="128" height="128"></canvas>
-        </div>
-    
-        <div>
-            <h3>icon-144x144.png</h3>
-            <canvas id="canvas144" width="144" height="144"></canvas>
-        </div>
-    
-        <div>
-            <h3>icon-152x152.png</h3>
-            <canvas id="canvas152" width="152" height="152"></canvas>
-        </div>
-    
-        <div>
-            <h3>icon-192x192.png</h3>
-            <canvas id="canvas192" width="192" height="192"></canvas>
-        </div>
-    
-        <div>
-            <h3>icon-384x384.png</h3>
-            <canvas id="canvas384" width="384" height="384"></canvas>
-        </div>
-    
-        <div>
-            <h3>icon-512x512.png</h3>
-            <canvas id="canvas512" width="512" height="512"></canvas>
-        </div>
-    
+    <div id="icons-container"></div>
     
     <script>
-        function drawIcon(canvas, size) {
-            const ctx = canvas.getContext('2d');
+        const iconSizes = [72, 96, 128, 144, 152, 192, 384, 512];
+        const svgIcon = `<?xml version="1.0" encoding="UTF-8"?>
+<svg width="192" height="192" viewBox="0 0 192 192" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background circle -->
+  <circle cx="96" cy="96" r="92" fill="url(#grad)" stroke="#fff" stroke-width="2"/>
+  
+  <!-- Suitcase icon -->
+  <g transform="translate(38.400000000000006, 48)">
+    <!-- Suitcase body -->
+    <rect x="0" y="28.799999999999997" width="115.19999999999999" height="76.80000000000001" rx="8" fill="#fff" stroke="#333" stroke-width="2"/>
+    
+    <!-- Suitcase handle -->
+    <rect x="38.400000000000006" y="9.600000000000001" width="38.400000000000006" height="23.04" rx="4" fill="none" stroke="#333" stroke-width="2"/>
+    
+    <!-- Suitcase lock -->
+    <rect x="51.84" y="48" width="11.52" height="15.36" rx="2" fill="#333"/>
+    
+    <!-- Travel stickers -->
+    <circle cx="28.799999999999997" cy="67.19999999999999" r="7.68" fill="#ff6b6b"/>
+    <circle cx="86.4" cy="57.599999999999994" r="7.68" fill="#4ecdc4"/>
+    <circle cx="67.19999999999999" cy="86.4" r="7.68" fill="#ffe66d"/>
+  </g>
+  
+  <!-- Travel destination pin -->
+  <g transform="translate(134.39999999999998, 28.799999999999997)">
+    <circle cx="0" cy="0" r="15.36" fill="#ff6b6b"/>
+    <circle cx="0" cy="0" r="7.68" fill="#fff"/>
+  </g>
+</svg>`;
+        
+        function generateAllIcons() {
+            const container = document.getElementById('icons-container');
+            container.innerHTML = '';
             
-            // Background
-            ctx.fillStyle = '#667eea';
-            ctx.fillRect(0, 0, size, size);
-            
-            // Circle
-            ctx.fillStyle = 'white';
-            ctx.beginPath();
-            ctx.arc(size/2, size/2, size*0.35, 0, 2 * Math.PI);
-            ctx.fill();
-            
-            // Inner circle
-            ctx.fillStyle = '#667eea';
-            ctx.beginPath();
-            ctx.arc(size/2, size/2, size*0.25, 0, 2 * Math.PI);
-            ctx.fill();
-            
-            // Emoji
-            ctx.fillStyle = 'white';
-            ctx.font = size*0.4 + 'px Arial';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText('🧳', size/2, size/2);
+            iconSizes.forEach(size => {
+                const iconContainer = document.createElement('div');
+                iconContainer.className = 'icon-container';
+                
+                const title = document.createElement('h3');
+                title.textContent = `icon-${size}x${size}.png`;
+                iconContainer.appendChild(title);
+                
+                const canvas = document.createElement('canvas');
+                canvas.width = size;
+                canvas.height = size;
+                canvas.style.width = Math.min(size, 200) + 'px';
+                canvas.style.height = Math.min(size, 200) + 'px';
+                
+                const ctx = canvas.getContext('2d');
+                const img = new Image();
+                
+                img.onload = function() {
+                    ctx.drawImage(img, 0, 0, size, size);
+                    
+                    // Add download link
+                    const downloadLink = document.createElement('a');
+                    downloadLink.download = `icon-${size}x${size}.png`;
+                    downloadLink.href = canvas.toDataURL();
+                    downloadLink.textContent = 'Download';
+                    downloadLink.style.display = 'block';
+                    downloadLink.style.marginTop = '10px';
+                    
+                    iconContainer.appendChild(downloadLink);
+                };
+                
+                // Create SVG with current size
+                const scaledSvg = `<?xml version="1.0" encoding="UTF-8"?>
+<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background circle -->
+  <circle cx="${size/2}" cy="${size/2}" r="${size/2 - 4}" fill="url(#grad)" stroke="#fff" stroke-width="2"/>
+  
+  <!-- Suitcase icon -->
+  <g transform="translate(${size*0.2}, ${size*0.25})">
+    <!-- Suitcase body -->
+    <rect x="0" y="${size*0.15}" width="${size*0.6}" height="${size*0.4}" rx="8" fill="#fff" stroke="#333" stroke-width="2"/>
+    
+    <!-- Suitcase handle -->
+    <rect x="${size*0.2}" y="${size*0.05}" width="${size*0.2}" height="${size*0.12}" rx="4" fill="none" stroke="#333" stroke-width="2"/>
+    
+    <!-- Suitcase lock -->
+    <rect x="${size*0.27}" y="${size*0.25}" width="${size*0.06}" height="${size*0.08}" rx="2" fill="#333"/>
+    
+    <!-- Travel stickers -->
+    <circle cx="${size*0.15}" cy="${size*0.35}" r="${size*0.04}" fill="#ff6b6b"/>
+    <circle cx="${size*0.45}" cy="${size*0.3}" r="${size*0.04}" fill="#4ecdc4"/>
+    <circle cx="${size*0.35}" cy="${size*0.45}" r="${size*0.04}" fill="#ffe66d"/>
+  </g>
+  
+  <!-- Travel destination pin -->
+  <g transform="translate(${size*0.7}, ${size*0.15})">
+    <circle cx="0" cy="0" r="${size*0.08}" fill="#ff6b6b"/>
+    <circle cx="0" cy="0" r="${size*0.04}" fill="#fff"/>
+  </g>
+</svg>`;
+                
+                img.src = 'data:image/svg+xml;base64,' + btoa(scaledSvg);
+                
+                iconContainer.appendChild(canvas);
+                container.appendChild(iconContainer);
+            });
         }
         
-        
-            drawIcon(document.getElementById('canvas16'), 16);
-        
-            drawIcon(document.getElementById('canvas32'), 32);
-        
-            drawIcon(document.getElementById('canvas72'), 72);
-        
-            drawIcon(document.getElementById('canvas96'), 96);
-        
-            drawIcon(document.getElementById('canvas128'), 128);
-        
-            drawIcon(document.getElementById('canvas144'), 144);
-        
-            drawIcon(document.getElementById('canvas152'), 152);
-        
-            drawIcon(document.getElementById('canvas192'), 192);
-        
-            drawIcon(document.getElementById('canvas384'), 384);
-        
-            drawIcon(document.getElementById('canvas512'), 512);
-        
+        function downloadAllIcons() {
+            alert('Please generate icons first, then download each icon individually. In a production environment, you would use a build tool to generate these automatically.');
+        }
     </script>
 </body>
 </html>
