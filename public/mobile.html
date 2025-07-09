@@ -4,6 +4,41 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Din Reisevenn - Mobil</title>
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json">
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#667eea">
+    <meta name="background-color" content="#667eea">
+    <meta name="display" content="standalone">
+    <meta name="start_url" content="/mobile.html">
+    
+    <!-- Apple PWA Meta Tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Din Reisevenn">
+    <link rel="apple-touch-icon" href="/icons/icon-192x192.png">
+    
+    <!-- Microsoft PWA Meta Tags -->
+    <meta name="msapplication-TileColor" content="#667eea">
+    <meta name="msapplication-TileImage" content="/icons/icon-144x144.png">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/icons/icon-16x16.png">
+    
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="En AI-drevet reiseplanleggingsapp som hjelper deg med å lage personlige reiseplaner basert på dine preferanser og budsjett.">
+    <meta name="keywords" content="reiseplanlegging, AI, Norge, ferie, reise, budsjett">
+    <meta name="author" content="Din Reisevenn">
+    
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:title" content="Din Reisevenn - AI Travel Planner">
+    <meta property="og:description" content="En AI-drevet reiseplanleggingsapp som hjelper deg med å lage personlige reiseplaner basert på dine preferanser og budsjett.">
+    <meta property="og:image" content="/icons/icon-512x512.png">
+    <meta property="og:url" content="https://dinreisevenn.no">
+    <meta property="og:type" content="website">
     <style>
         * {
             margin: 0;
@@ -574,9 +609,21 @@
         
         function displayError(message) {
             const resultsDiv = document.getElementById('results');
-            resultsDiv.innerHTML = `<div class="error">
-                <strong>Feil:</strong> ${message}
-            </div>`;
+            const errorInfo = handleOfflineError({ message });
+            
+            let errorHTML = `<div class="error">
+                <strong>Feil:</strong> ${errorInfo.error}`;
+                
+            if (errorInfo.isOffline) {
+                errorHTML += `<br><br>
+                <strong>Offline modus:</strong><br>
+                • Du kan fortsatt se tidligere reiseplaner hvis de er cachet<br>
+                • Nettverksfunksjoner vil fungere når du er online igjen<br>
+                • App-en vil synkronisere når internettforbindelsen er tilbake`;
+            }
+            
+            errorHTML += '</div>';
+            resultsDiv.innerHTML = errorHTML;
             resultsDiv.style.display = 'block';
         }
         
@@ -768,7 +815,139 @@
                     console.error('Error loading shared plan:', error);
                 }
             }
+            
+            // PWA Installation
+            initializePWA();
         });
+        
+        // PWA Functions
+        let deferredPrompt;
+        let isInstalled = false;
+        
+        function initializePWA() {
+            // Register service worker
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(registration => {
+                        console.log('Service Worker registered successfully:', registration);
+                    })
+                    .catch(error => {
+                        console.log('Service Worker registration failed:', error);
+                    });
+            }
+            
+            // Check if app is already installed
+            window.addEventListener('appinstalled', (evt) => {
+                isInstalled = true;
+                hideInstallButton();
+            });
+            
+            // Listen for the beforeinstallprompt event
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                deferredPrompt = e;
+                showInstallButton();
+            });
+            
+            // Check if app is in standalone mode
+            if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone) {
+                isInstalled = true;
+                hideInstallButton();
+            }
+            
+            // Add install button after form if not installed
+            if (!isInstalled) {
+                addInstallButton();
+            }
+        }
+        
+        function addInstallButton() {
+            const form = document.getElementById('travelForm');
+            const installButton = document.createElement('button');
+            installButton.id = 'installButton';
+            installButton.className = 'submit-btn';
+            installButton.style.marginTop = '10px';
+            installButton.style.backgroundColor = '#28a745';
+            installButton.style.display = 'none';
+            installButton.innerHTML = '📱 Installer App';
+            installButton.onclick = installApp;
+            form.parentNode.insertBefore(installButton, form.nextSibling);
+        }
+        
+        function showInstallButton() {
+            const installButton = document.getElementById('installButton');
+            if (installButton) {
+                installButton.style.display = 'block';
+            }
+        }
+        
+        function hideInstallButton() {
+            const installButton = document.getElementById('installButton');
+            if (installButton) {
+                installButton.style.display = 'none';
+            }
+        }
+        
+        function installApp() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        console.log('User accepted the install prompt');
+                        hideInstallButton();
+                    } else {
+                        console.log('User dismissed the install prompt');
+                    }
+                    deferredPrompt = null;
+                });
+            }
+        }
+        
+        // Offline functionality
+        window.addEventListener('online', function() {
+            console.log('App is online');
+            showNetworkStatus('Online', '#28a745');
+        });
+        
+        window.addEventListener('offline', function() {
+            console.log('App is offline');
+            showNetworkStatus('Offline - Begrensede funksjoner', '#dc3545');
+        });
+        
+        function showNetworkStatus(message, color) {
+            const statusDiv = document.createElement('div');
+            statusDiv.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                background: ${color};
+                color: white;
+                padding: 10px;
+                text-align: center;
+                z-index: 9999;
+                font-weight: bold;
+            `;
+            statusDiv.textContent = message;
+            document.body.appendChild(statusDiv);
+            
+            setTimeout(() => {
+                if (statusDiv.parentNode) {
+                    statusDiv.parentNode.removeChild(statusDiv);
+                }
+            }, 3000);
+        }
+        
+        // Enhanced error handling for offline mode
+        function handleOfflineError(error) {
+            if (!navigator.onLine) {
+                return {
+                    error: 'Du er offline. Noen funksjoner er ikke tilgjengelige.',
+                    isOffline: true
+                };
+            }
+            return { error: error.message, isOffline: false };
+        }
     </script>
     
     <!-- Optional: Include html2pdf for PDF generation -->

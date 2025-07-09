@@ -4,6 +4,13 @@ En AI-drevet reiseplanleggingsapp som hjelper deg med å lage personlige reisepl
 
 ## Nye funksjoner
 
+### 📱 PWA (Progressive Web App)
+- **Installerbar**: Kan installeres som en native app på mobil og desktop
+- **Offline-støtte**: Fungerer delvis offline med cached innhold
+- **Push-notifikasjoner**: Motta varsler om nye reiseplaner (kommer snart)
+- **Responsivt design**: Optimalisert for alle skjermstørrelser
+- **App-lignende opplevelse**: Fullscreen-modus uten nettleser-UI
+
 ### 📱 Mobiloptimalisert skjema
 - **Alle felt på én side**: I stedet for steg-for-steg prosess får du nå alle feltene på samme side for bedre mobilopplevelse
 - **Responsivt design**: Fungerer perfekt på mobil, tablet og desktop
@@ -30,6 +37,13 @@ En AI-drevet reiseplanleggingsapp som hjelper deg med å lage personlige reisepl
 
 ## Installasjon
 
+### 📱 PWA Installasjon
+1. Åpne `https://dinreisevenn.no/mobile.html` i nettleseren
+2. Klikk på "Installer App"-knappen som vises
+3. Bekreft installasjonen
+4. Appen vil nå være tilgjengelig som en native app på enheten din
+
+### 🖥️ Lokal utvikling
 1. Klon repositoriet
 2. Installer dependencies:
    ```bash
@@ -41,12 +55,18 @@ En AI-drevet reiseplanleggingsapp som hjelper deg med å lage personlige reisepl
    cp .env.example .env
    ```
 
-4. Start serveren:
+4. Generer PWA-ikoner (valgfritt):
+   ```bash
+   node generate-icons.js
+   ```
+   Åpne deretter `public/icon-generator.html` i nettleseren for å laste ned ikoner
+
+5. Start serveren:
    ```bash
    npm start
    ```
 
-5. Åpne `http://localhost:3000/mobile.html` for mobilgrensesnittet
+6. Åpne `http://localhost:3000/mobile.html` for mobilgrensesnittet
 
 ## Miljøvariabler
 
@@ -68,6 +88,14 @@ Appen validerer nå budsjett mer nøyaktig med realistiske norske priser:
 
 ## Tekniske forbedringer
 
+### 🔧 PWA-funksjoner
+- **Service Worker**: Caching og offline-støtte
+- **Web App Manifest**: Metadata for app-installasjon
+- **Responsize ikoner**: Optimalisert for alle enheter og skjermstørrelser
+- **Offline-deteksjon**: Intelligent håndtering av nettverksstatus
+- **App Shell**: Rask lasting av grunnleggende app-struktur
+
+### 🤖 AI og Backend
 - **Forbedret prompt engineering**: Mer spesifikke instruksjoner til AI for bedre resultat
 - **Budsjettvalidering middleware**: Sikrer at alle budsjett-relaterte forespørsler valideres
 - **Mobiloptimalisert UI**: Responsiv design som fungerer perfekt på alle enheter
