@@ -3,15 +3,16 @@ const router = express.Router();
 const suggestionController = require('../controllers/suggestionController');
 const attractionController = require('../controllers/attractionController');
 const bookingController = require('../controllers/bookingController');
+const budgetValidator = require('../middleware/budgetValidator');
 
 // Route for generating travel suggestions
-router.post('/generate-travel-suggestions', suggestionController.generateSuggestions);
+router.use('/suggestions', suggestionController);
 
 // Route for fetching attractions based on location
-router.get('/attractions/:location', attractionController.getAttractions);
+router.use('/attractions', attractionController);
 
-// Route for fetching booking information
-router.post('/bookings', bookingController.createBooking);
+// Route for booking management
+router.use('/bookings', bookingController);
 
 module.exports = router;
 

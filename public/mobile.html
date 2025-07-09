@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Din Reisevenn - Mobil</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .checkbox-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .checkbox-item input[type="checkbox"] {
+            width: auto;
+        }
+        
+        .submit-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .submit-btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .results {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            display: none;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            display: none;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 2s linear infinite;
+            margin: 0 auto 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .error {
+            color: #dc3545;
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+        
+        .success {
+            color: #155724;
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+        
+        @media (max-width: 480px) {
+            .container {
+                padding: 20px;
+                margin: 10px;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+            
+            .checkbox-group {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧳 Din Reisevenn</h1>
+        
+        <form id="travelForm">
+            <div class="form-group">
+                <label for="location">Hvor vil du reise? *</label>
+                <input type="text" id="location" name="location" required placeholder="f.eks. Oslo, Paris, Tokyo">
+            </div>
+            
+            <div class="form-group">
+                <label for="duration">Hvor mange dager? *</label>
+                <input type="number" id="duration" name="duration" min="1" max="30" required placeholder="Antall dager">
+            </div>
+            
+            <div class="form-group">
+                <label for="groupSize">Hvor mange reisende? *</label>
+                <input type="number" id="groupSize" name="groupSize" min="1" max="20" required placeholder="Antall personer">
+            </div>
+            
+            <div class="form-group">
+                <label for="budget">Budsjett (NOK) *</label>
+                <input type="number" id="budget" name="budget" min="100" required placeholder="f.eks. 5000">
+            </div>
+            
+            <div class="form-group">
+                <label for="ageGroup">Aldersgruppe *</label>
+                <select id="ageGroup" name="ageGroup" required>
+                    <option value="">Velg aldersgruppe</option>
+                    <option value="barn">Barn (0-12 år)</option>
+                    <option value="tenåring">Tenåring (13-19 år)</option>
+                    <option value="ung-voksen">Ung voksen (20-35 år)</option>
+                    <option value="voksen">Voksen (36-55 år)</option>
+                    <option value="senior">Senior (55+ år)</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="activityLevel">Aktivitetsnivå *</label>
+                <select id="activityLevel" name="activityLevel" required>
+                    <option value="">Velg aktivitetsnivå</option>
+                    <option value="lav">Lav - Avslappet tempo</option>
+                    <option value="moderat">Moderat - Balansert</option>
+                    <option value="høy">Høy - Masse aktiviteter</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>Interesser *</label>
+                <div class="checkbox-group">
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="kultur" name="interests" value="kultur">
+                        <label for="kultur">Kultur</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="natur" name="interests" value="natur">
+                        <label for="natur">Natur</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="mat" name="interests" value="mat">
+                        <label for="mat">Mat & Drikke</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="shopping" name="interests" value="shopping">
+                        <label for="shopping">Shopping</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="historie" name="interests" value="historie">
+                        <label for="historie">Historie</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="sport" name="interests" value="sport">
+                        <label for="sport">Sport</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="kunst" name="interests" value="kunst">
+                        <label for="kunst">Kunst</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="natteliv" name="interests" value="natteliv">
+                        <label for="natteliv">Natteliv</label>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>Transportmidler *</label>
+                <div class="checkbox-group">
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="kollektiv" name="transport" value="kollektiv">
+                        <label for="kollektiv">Kollektivtransport</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="bil" name="transport" value="bil">
+                        <label for="bil">Bil</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="sykkel" name="transport" value="sykkel">
+                        <label for="sykkel">Sykkel</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="gange" name="transport" value="gange">
+                        <label for="gange">Gange</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="taxi" name="transport" value="taxi">
+                        <label for="taxi">Taxi</label>
+                    </div>
+                </div>
+            </div>
+            
+            <button type="submit" class="submit-btn">Lag reiseplan! 🚀</button>
+        </form>
+        
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Lager din personlige reiseplan...</p>
+        </div>
+        
+        <div class="results" id="results"></div>
+    </div>
+
+    <script>
+        document.getElementById('travelForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const data = {};
+            
+            // Samle alle form-data
+            for (let [key, value] of formData.entries()) {
+                if (data[key]) {
+                    if (Array.isArray(data[key])) {
+                        data[key].push(value);
+                    } else {
+                        data[key] = [data[key], value];
+                    }
+                } else {
+                    data[key] = value;
+                }
+            }
+            
+            // Konverter til arrays for checkboxes
+            const interests = Array.from(document.querySelectorAll('input[name="interests"]:checked')).map(cb => cb.value);
+            const transport = Array.from(document.querySelectorAll('input[name="transport"]:checked')).map(cb => cb.value);
+            
+            if (interests.length === 0) {
+                alert('Vennligst velg minst en interesse');
+                return;
+            }
+            
+            if (transport.length === 0) {
+                alert('Vennligst velg minst ett transportmiddel');
+                return;
+            }
+            
+            data.interests = interests;
+            data.transport = transport;
+            data.duration = parseInt(data.duration);
+            data.groupSize = parseInt(data.groupSize);
+            data.budget = parseInt(data.budget);
+            
+            // Vis loading
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('results').style.display = 'none';
+            document.querySelector('.submit-btn').disabled = true;
+            
+            try {
+                const response = await fetch('/api/mobile-travel-form', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    displayResults(result);
+                } else {
+                    throw new Error(result.error || 'Noe gikk galt');
+                }
+            } catch (error) {
+                displayError(error.message);
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+                document.querySelector('.submit-btn').disabled = false;
+            }
+        });
+        
+        function displayResults(result) {
+            const resultsDiv = document.getElementById('results');
+            let html = '<h2>Din reiseplan er klar! 🎉</h2>';
+            
+            if (result.budgetAnalysis) {
+                html += `<div class="success">
+                    <strong>Budsjettanalyse:</strong> ${result.budgetAnalysis.description}<br>
+                    <em>${result.budgetAnalysis.guidance}</em>
+                </div>`;
+            }
+            
+            if (result.totalEstimatedCost) {
+                html += `<div class="success">
+                    <strong>Estimert totalkostnad:</strong> ${result.totalEstimatedCost}
+                </div>`;
+            }
+            
+            if (result.budgetBreakdown) {
+                html += `<div class="success">
+                    <strong>Budsjettfordeling:</strong><br>
+                    ${result.budgetBreakdown.accommodation ? `Overnatting: ${result.budgetBreakdown.accommodation}<br>` : ''}
+                    ${result.budgetBreakdown.food ? `Mat: ${result.budgetBreakdown.food}<br>` : ''}
+                    ${result.budgetBreakdown.transport ? `Transport: ${result.budgetBreakdown.transport}<br>` : ''}
+                    ${result.budgetBreakdown.activities ? `Aktiviteter: ${result.budgetBreakdown.activities}<br>` : ''}
+                </div>`;
+            }
+            
+            if (result.suggestions) {
+                html += '<h3>Forslag:</h3>';
+                result.suggestions.forEach(suggestion => {
+                    html += `<div style="margin-bottom: 15px; padding: 10px; background: white; border-radius: 5px;">
+                        <strong>${suggestion.title}</strong><br>
+                        ${suggestion.description}
+                        ${suggestion.estimatedCost ? `<br><em>Estimert kostnad: ${suggestion.estimatedCost}</em>` : ''}
+                    </div>`;
+                });
+            }
+            
+            if (result.plans) {
+                html += '<h3>Detaljert plan:</h3>';
+                result.plans.forEach(plan => {
+                    html += `<div style="margin-bottom: 20px; padding: 15px; background: white; border-radius: 5px;">
+                        <h4>${plan.title}</h4>`;
+                    if (plan.activities) {
+                        plan.activities.forEach(activity => {
+                            html += `<div style="margin: 10px 0; padding: 8px; background: #f8f9fa; border-radius: 3px;">
+                                <strong>${activity.time}</strong> - ${activity.activity}<br>
+                                ${activity.description}
+                                ${activity.estimatedCost ? `<br><em>Kostnad: ${activity.estimatedCost}</em>` : ''}
+                            </div>`;
+                        });
+                    }
+                    html += '</div>';
+                });
+            }
+            
+            if (result.plan && typeof result.plan === 'string') {
+                html += `<div style="white-space: pre-wrap; background: white; padding: 15px; border-radius: 5px;">
+                    ${result.plan}
+                </div>`;
+            }
+            
+            resultsDiv.innerHTML = html;
+            resultsDiv.style.display = 'block';
+        }
+        
+        function displayError(message) {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = `<div class="error">
+                <strong>Feil:</strong> ${message}
+            </div>`;
+            resultsDiv.style.display = 'block';
+        }
+    </script>
+</body>
+</html>
