@@ -1,11 +1,34 @@
-
-    <svg width="72" height="72" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-            <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
-                <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
-            </linearGradient>
-        </defs>
-        <circle cx="36" cy="36" r="34" fill="url(#grad)" stroke="#fff" stroke-width="2"/>
-        <text x="36" y="36" text-anchor="middle" font-family="Arial" font-size="18" fill="white" dominant-baseline="middle">🧳</text>
-    </svg>
+<svg width="72" height="72" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+        <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+      </linearGradient>
+    </defs>
+    
+    <!-- Background circle -->
+    <circle cx="36" cy="36" r="34" fill="url(#grad)" stroke="#fff" stroke-width="2"/>
+    
+    <!-- Suitcase icon -->
+    <g transform="translate(14.4, 18)">
+      <!-- Suitcase body -->
+      <rect x="0" y="10.799999999999999" width="43.199999999999996" height="28.8" rx="4" fill="#fff" stroke="#333" stroke-width="2"/>
+      
+      <!-- Suitcase handle -->
+      <rect x="14.4" y="3.6" width="14.4" height="8.64" rx="2" fill="none" stroke="#333" stroke-width="2"/>
+      
+      <!-- Suitcase lock -->
+      <rect x="19.44" y="18" width="4.32" height="5.76" rx="1" fill="#333"/>
+      
+      <!-- Travel stickers -->
+      <circle cx="10.799999999999999" cy="25.2" r="2.88" fill="#ff6b6b"/>
+      <circle cx="32.4" cy="21.599999999999998" r="2.88" fill="#4ecdc4"/>
+      <circle cx="25.2" cy="32.4" r="2.88" fill="#ffe66d"/>
+    </g>
+    
+    <!-- Travel destination pin -->
+    <g transform="translate(50.4, 10.799999999999999)">
+      <circle cx="0" cy="0" r="5.76" fill="#ff6b6b"/>
+      <circle cx="0" cy="0" r="2.88" fill="#fff"/>
+    </g>
+  </svg>

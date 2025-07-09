@@ -2,9 +2,7 @@ const CACHE_NAME = 'din-reisevenn-v1';
 const urlsToCache = [
   '/mobile.html',
   '/manifest.json',
-  '/icons/icon-192x192.png',
-  '/icons/icon-512x512.png',
-  // Add other static assets
+  // Icons will be cached as they're requested
 ];
 
 // Install event - cache resources
@@ -13,7 +11,12 @@ self.addEventListener('install', event => {
     caches.open(CACHE_NAME)
       .then(cache => {
         console.log('Opened cache');
-        return cache.addAll(urlsToCache);
+        // Only cache files that definitely exist
+        return cache.addAll(urlsToCache.filter(url => url));
+      })
+      .catch(error => {
+        console.warn('Cache installation failed:', error);
+        // Don't fail installation if caching fails
       })
   );
 });
@@ -87,8 +90,8 @@ function doBackgroundSync() {
 self.addEventListener('push', event => {
   const options = {
     body: event.data ? event.data.text() : 'Ny reiseplan er klar!',
-    icon: '/icons/icon-192x192.png',
-    badge: '/icons/icon-72x72.png',
+    icon: '/icons/icon-192x192.svg',
+    badge: '/icons/icon-72x72.svg',
     data: {
       url: '/mobile.html'
     }
