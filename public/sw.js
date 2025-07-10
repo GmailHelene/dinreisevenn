@@ -2,7 +2,11 @@ const CACHE_NAME = 'din-reisevenn-v1';
 const urlsToCache = [
   '/mobile.html',
   '/manifest.json',
-  // Icons will be cached as they're requested
+  '/icons/icon-192x192.svg',
+  '/icons/icon-512x512.svg',
+  '/icons/icon-192x192.png',
+  '/icons/icon-512x512.png',
+  // Additional core assets will be cached as requested
 ];
 
 // Install event - cache resources
