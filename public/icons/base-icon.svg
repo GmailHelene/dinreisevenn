@@ -4,34 +4,62 @@
       <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
       <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
     </linearGradient>
+    <linearGradient id="suitcaseGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffffff;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#f8f9fa;stop-opacity:1" />
+    </linearGradient>
+    <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="4" dy="4" stdDeviation="8" flood-color="#333" flood-opacity="0.3"/>
+    </filter>
   </defs>
   
   <!-- Background circle -->
   <circle cx="256" cy="256" r="248" fill="url(#grad)" stroke="#fff" stroke-width="8"/>
   
   <!-- Suitcase icon -->
-  <g transform="translate(102, 128)">
+  <g transform="translate(102, 128)" filter="url(#shadow)">
     <!-- Suitcase body -->
-    <rect x="0" y="77" width="308" height="205" rx="20" fill="#fff" stroke="#333" stroke-width="8"/>
+    <rect x="0" y="77" width="308" height="205" rx="20" fill="url(#suitcaseGrad)" stroke="#333" stroke-width="6"/>
     
     <!-- Suitcase handle -->
-    <rect x="102" y="26" width="104" height="61" rx="15" fill="none" stroke="#333" stroke-width="8"/>
+    <rect x="102" y="26" width="104" height="61" rx="15" fill="none" stroke="#333" stroke-width="6"/>
     
     <!-- Suitcase lock -->
     <rect x="138" y="128" width="32" height="41" rx="8" fill="#333"/>
     
     <!-- Travel stickers -->
-    <circle cx="77" cy="179" r="20" fill="#ff6b6b"/>
-    <circle cx="231" cy="154" r="20" fill="#4ecdc4"/>
-    <circle cx="179" cy="231" r="20" fill="#ffe66d"/>
+    <circle cx="77" cy="179" r="18" fill="#ff6b6b" opacity="0.9"/>
+    <circle cx="231" cy="154" r="18" fill="#4ecdc4" opacity="0.9"/>
+    <circle cx="179" cy="231" r="18" fill="#ffe66d" opacity="0.9"/>
+    
+    <!-- Norwegian flag sticker -->
+    <g transform="translate(60, 120)">
+      <rect x="0" y="0" width="34" height="24" rx="3" fill="#BA0C2F"/>
+      <rect x="12" y="0" width="4" height="24" fill="#fff"/>
+      <rect x="0" y="10" width="34" height="4" fill="#fff"/>
+      <rect x="13" y="0" width="2" height="24" fill="#003087"/>
+      <rect x="0" y="11" width="34" height="2" fill="#003087"/>
+    </g>
   </g>
   
   <!-- Travel destination pin -->
   <g transform="translate(358, 77)">
-    <circle cx="0" cy="0" r="41" fill="#ff6b6b"/>
+    <circle cx="0" cy="0" r="41" fill="#ff6b6b" filter="url(#shadow)"/>
     <circle cx="0" cy="0" r="20" fill="#fff"/>
+    <circle cx="0" cy="0" r="8" fill="#ff6b6b"/>
   </g>
   
-  <!-- Travel emoji -->
-  <text x="256" y="400" text-anchor="middle" font-size="48" fill="#fff">🧳</text>
+  <!-- Compass icon -->
+  <g transform="translate(80, 350)">
+    <circle cx="0" cy="0" r="35" fill="#fff" stroke="#333" stroke-width="3" opacity="0.9"/>
+    <circle cx="0" cy="0" r="3" fill="#ff6b6b"/>
+    <line x1="0" y1="-25" x2="0" y2="-15" stroke="#ff6b6b" stroke-width="2"/>
+    <line x1="25" y1="0" x2="15" y2="0" stroke="#333" stroke-width="2"/>
+    <line x1="0" y1="25" x2="0" y2="15" stroke="#333" stroke-width="2"/>
+    <line x1="-25" y1="0" x2="-15" y2="0" stroke="#333" stroke-width="2"/>
+    <text x="0" y="-30" text-anchor="middle" font-size="12" fill="#333" font-weight="bold">N</text>
+  </g>
+  
+  <!-- Modern travel text -->
+  <text x="256" y="450" text-anchor="middle" font-size="36" fill="#fff" font-weight="bold" opacity="0.9">REISEVENN</text>
 </svg>

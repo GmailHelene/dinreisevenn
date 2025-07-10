@@ -1,49 +1,117 @@
+/**
+ * PWA PNG Icon Generator
+ * Creates proper PNG icons using canvas for PWA installation
+ */
+
 const fs = require('fs');
 const path = require('path');
-
-// Simple PNG icon creator using data URIs
-// This creates basic PNG icons as fallbacks
+const { createCanvas } = require('canvas');
 
 const iconSizes = [16, 32, 72, 96, 128, 144, 152, 192, 384, 512];
 
-function createSimplePNG(size) {
-  // Create a simple travel-themed icon using SVG
-  const svg = `<svg width="${size}" height="${size}" xmlns="http://www.w3.org/2000/svg">
-    <defs>
-      <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
-        <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
-      </linearGradient>
-    </defs>
-    
-    <!-- Background circle -->
-    <circle cx="${size/2}" cy="${size/2}" r="${size/2 - 2}" fill="url(#grad)" stroke="#fff" stroke-width="2"/>
-    
-    <!-- Suitcase icon -->
-    <g transform="translate(${size*0.2}, ${size*0.25})">
-      <!-- Suitcase body -->
-      <rect x="0" y="${size*0.15}" width="${size*0.6}" height="${size*0.4}" rx="4" fill="#fff" stroke="#333" stroke-width="2"/>
-      
-      <!-- Suitcase handle -->
-      <rect x="${size*0.2}" y="${size*0.05}" width="${size*0.2}" height="${size*0.12}" rx="2" fill="none" stroke="#333" stroke-width="2"/>
-      
-      <!-- Suitcase lock -->
-      <rect x="${size*0.27}" y="${size*0.25}" width="${size*0.06}" height="${size*0.08}" rx="1" fill="#333"/>
-      
-      <!-- Travel stickers -->
-      <circle cx="${size*0.15}" cy="${size*0.35}" r="${size*0.04}" fill="#ff6b6b"/>
-      <circle cx="${size*0.45}" cy="${size*0.3}" r="${size*0.04}" fill="#4ecdc4"/>
-      <circle cx="${size*0.35}" cy="${size*0.45}" r="${size*0.04}" fill="#ffe66d"/>
-    </g>
-    
-    <!-- Travel destination pin -->
-    <g transform="translate(${size*0.7}, ${size*0.15})">
-      <circle cx="0" cy="0" r="${size*0.08}" fill="#ff6b6b"/>
-      <circle cx="0" cy="0" r="${size*0.04}" fill="#fff"/>
-    </g>
-  </svg>`;
+// Generate a proper PNG icon using canvas
+const generatePNGIcon = (size) => {
+  const canvas = createCanvas(size, size);
+  const ctx = canvas.getContext('2d');
   
-  return svg;
+  // Create gradient background
+  const gradient = ctx.createLinearGradient(0, 0, size, size);
+  gradient.addColorStop(0, '#667eea');
+  gradient.addColorStop(1, '#764ba2');
+  
+  // Draw circle background
+  ctx.fillStyle = gradient;
+  ctx.beginPath();
+  ctx.arc(size/2, size/2, size/2 - 4, 0, 2 * Math.PI);
+  ctx.fill();
+  
+  // Draw white border
+  ctx.strokeStyle = '#fff';
+  ctx.lineWidth = Math.max(1, size * 0.004);
+  ctx.stroke();
+  
+  // Draw suitcase body
+  ctx.fillStyle = '#fff';
+  ctx.strokeStyle = '#333';
+  ctx.lineWidth = Math.max(1, size * 0.004);
+  const suitcaseX = size * 0.2;
+  const suitcaseY = size * 0.4;
+  const suitcaseW = size * 0.6;
+  const suitcaseH = size * 0.35;
+  
+  ctx.beginPath();
+  ctx.roundRect(suitcaseX, suitcaseY, suitcaseW, suitcaseH, size * 0.02);
+  ctx.fill();
+  ctx.stroke();
+  
+  // Draw suitcase handle
+  ctx.fillStyle = 'transparent';
+  ctx.strokeStyle = '#333';
+  ctx.lineWidth = Math.max(1, size * 0.004);
+  const handleX = size * 0.4;
+  const handleY = size * 0.3;
+  const handleW = size * 0.2;
+  const handleH = size * 0.12;
+  
+  ctx.beginPath();
+  ctx.roundRect(handleX, handleY, handleW, handleH, size * 0.01);
+  ctx.stroke();
+  
+  // Draw travel stickers
+  ctx.fillStyle = '#ff6b6b';
+  ctx.beginPath();
+  ctx.arc(size * 0.35, size * 0.6, size * 0.04, 0, 2 * Math.PI);
+  ctx.fill();
+  
+  ctx.fillStyle = '#4ecdc4';
+  ctx.beginPath();
+  ctx.arc(size * 0.65, size * 0.55, size * 0.04, 0, 2 * Math.PI);
+  ctx.fill();
+  
+  ctx.fillStyle = '#ffe66d';
+  ctx.beginPath();
+  ctx.arc(size * 0.55, size * 0.7, size * 0.04, 0, 2 * Math.PI);
+  ctx.fill();
+  
+  // Draw location pin
+  ctx.fillStyle = '#ff6b6b';
+  ctx.beginPath();
+  ctx.arc(size * 0.7, size * 0.23, size * 0.08, 0, 2 * Math.PI);
+  ctx.fill();
+  
+  ctx.fillStyle = '#fff';
+  ctx.beginPath();
+  ctx.arc(size * 0.7, size * 0.23, size * 0.04, 0, 2 * Math.PI);
+  ctx.fill();
+  
+  // Draw text (only for larger icons)
+  if (size >= 128) {
+    ctx.fillStyle = '#fff';
+    ctx.font = `bold ${size * 0.08}px Arial`;
+    ctx.textAlign = 'center';
+    ctx.fillText('REISE', size/2, size * 0.85);
+  }
+  
+  return canvas.toBuffer('image/png');
+};
+
+console.log('🎨 Generating PNG icons for PWA...');
+
+const iconsDir = path.join(__dirname, 'public', 'icons');
+
+iconSizes.forEach(size => {
+  try {
+    const pngBuffer = generatePNGIcon(size);
+    const pngPath = path.join(iconsDir, `icon-${size}x${size}.png`);
+    fs.writeFileSync(pngPath, pngBuffer);
+    console.log(`✅ Created icon-${size}x${size}.png (${pngBuffer.length} bytes)`);
+  } catch (error) {
+    console.log(`❌ Failed to create icon-${size}x${size}.png:`, error.message);
+  }
+});
+
+console.log('\n🚀 PWA PNG Icon Generation Complete!');
+console.log('📱 Your app is now ready for mobile installation!');
 }
 
 function createIconFile(size) {
