@@ -333,7 +333,7 @@
             </div>
             
             <div class="form-group">
-                <label for="budget">Totalbudsjett (NOK) *</label>
+                <label for="budget">Budsjett pr. dag (NOK) *</label>
                 <input type="number" id="budget" name="budget" min="100" required placeholder="f.eks. 5000">
             </div>
             
@@ -598,7 +598,7 @@
             
             // Add share button separately after PDF/Calendar buttons
             html += `<div class="action-buttons">
-                <button onclick="shareTravel()" class="action-btn share-btn">� Del reiseplan</button>
+                <button onclick="shareTravel()" class="action-btn share-btn" id="shareBtn">� Del reiseplan</button>
             </div>`;
             
             resultsDiv.innerHTML = html;
@@ -606,6 +606,14 @@
             
             // Store result globally for sharing/PDF functions
             window.currentTravelPlan = result;
+            updateShareButtonState();
+        // Disable share button if no travel plan
+        function updateShareButtonState() {
+            const shareBtn = document.getElementById('shareBtn');
+            if (shareBtn) {
+                shareBtn.disabled = !window.currentTravelPlan;
+            }
+        }
             
             // Show review section after everything else
             document.getElementById('reviewSection').style.display = 'block';
@@ -636,6 +644,10 @@
         
         // Share functionality
         function shareTravel() {
+            if (!window.currentTravelPlan) {
+                alert('Ingen reiseplan å dele!');
+                return;
+            }
             const shareUrl = generateShareUrl();
             document.getElementById('shareUrl').value = shareUrl;
             document.getElementById('shareModal').style.display = 'block';
